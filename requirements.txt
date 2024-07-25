@@ -1,0 +1,10 @@
+customtkinter==5.2.1
+intelhex==2.3.0
+jmespath==1.0.1
+pyserial==3.5
+pyusb==1.2.1
+rich==13.6.0
+libusb==1.0.26b5
+licensing==0.41
+requests
+pyside6

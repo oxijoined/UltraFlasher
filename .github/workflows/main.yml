@@ -1,0 +1,61 @@
+name: Build, Upload and Release
+
+on:
+  # Triggers the workflow on push or pull request events but only for the "main" branch
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  build_and_release:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Setup Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.10'
+
+    - name: Install Dependencies
+      run: |
+        pip install -r requirements.txt
+        pip install nuitka
+        
+    - name: Generate version number
+      id: version
+      run: echo "NEW_VERSION=$(date +%Y%m%d%H%M%S)" >> $GITHUB_ENV
+      shell: bash
+
+    - name: Build with Nuitka
+      run: |
+        nuitka main.py --onefile --enable-plugin=pyside6 --disable-console --include-data-dir=resources=resources --windows-icon-from-ico=resources/app.ico --windows-uac-admin --product-name="ELRS FLASHER" --company-name="okcu" --product-version=1 --file-description=${{ env.NEW_VERSION }} --output-filename="UltraFlasher" --noinclude-data-files=.git/** --noinclude-data-files=.github/** --noinclude-data-files=.vscode/** --file-version=1 --output-dir=build_results --assume-yes-for-downloads
+        
+    - name: Upload Executable as Artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: UltraFlasher
+        path: build_results/UltraFlasher.exe
+        
+
+    - name: Create GitHub Release
+      id: create_release
+      uses: actions/create-release@v1
+      with:
+        tag_name: ${{ env.NEW_VERSION }}
+        release_name: ${{ env.NEW_VERSION }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.DEPLOY_TOKEN }}
+    
+
+    - name: Upload Executable to Release
+      uses: actions/upload-release-asset@v1
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: build_results/UltraFlasher.exe
+        asset_name: UltraFlasher.exe
+        asset_content_type: application/octet-stream
+      env:
+        GITHUB_TOKEN: ${{ secrets.DEPLOY_TOKEN }}

@@ -1,0 +1,9 @@
+<RCC>
+  <qresource prefix="svgs">
+    <file>images/Group.svg</file>
+    <file>images/drone-svgrepo-com.svg</file>
+    <file>images/images.png</file>
+    <file>images/refresh.svg</file>
+    <file>images/drone.svg</file>
+  </qresource>
+</RCC>
